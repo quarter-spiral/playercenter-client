@@ -8,9 +8,9 @@ group :development, :test do
   gem 'rack-client'
   gem 'playercenter-backend', '~> 0.0.7'
 
-  gem 'auth-client', '~> 0.0.12'
+  gem 'auth-client', '~> 0.0.13'
 
-  gem 'auth-backend', '~> 0.0.10'
+  gem 'auth-backend', '~> 0.0.11'
   gem 'sqlite3'
   gem 'nokogiri'
   gem 'sinatra_warden', git: 'https://github.com/quarter-spiral/sinatra_warden.git'

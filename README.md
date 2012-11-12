@@ -23,7 +23,7 @@ info # => {
      #          "id" => "87432",
      #          "name" => "Peter Smith"
      #        },
-     #        "galaxy-spiral" => {
+     #        "spiral-galaxy" => {
      #          "id" => "124890",
      #          "name" => "Pete S"
      #        }

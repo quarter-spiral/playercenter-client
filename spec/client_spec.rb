@@ -47,13 +47,13 @@ describe Playercenter::Client do
     venue_options = {"venue-id" => "2354243", "name" => "Peter Smith"}
     venue_token = auth_client.venue_token(app_token, 'facebook', venue_options)
     venue_uuid = auth_client.token_owner(venue_token)['uuid']
-    auth_client.attach_venue_identity_to(venue_token, venue_uuid, 'galaxy-spiral', {"venue-id" => "674735", "name" => "Pete"})
+    auth_client.attach_venue_identity_to(venue_token, venue_uuid, 'spiral-galaxy', {"venue-id" => "674735", "name" => "Pete"})
 
     info = @client.info_about(venue_uuid, venue_token)
     info['uuid'].must_equal venue_uuid
     info['venues'].keys.size.must_equal 2
     info['venues']['facebook'].must_equal("id" => venue_options['venue-id'], "name" => venue_options['name'])
-    info['venues']['galaxy-spiral'].must_equal("id" => '674735', "name" => 'Pete')
+    info['venues']['spiral-galaxy'].must_equal("id" => '674735', "name" => 'Pete')
   end
 
   it "returns nil when retrieving information about a non existing player" do
