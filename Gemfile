@@ -6,11 +6,13 @@ gemspec
 
 group :development, :test do
   gem 'rack-client'
-  gem 'playercenter-backend', '~> 0.0.7'
+  gem 'playercenter-backend', '~> 0.0.13'
 
-  gem 'auth-client', '~> 0.0.13'
+  gem 'uuid'
 
-  gem 'auth-backend', '~> 0.0.11'
+  gem 'auth-client', '~> 0.0.14'
+
+  gem 'auth-backend', '~> 0.0.15'
   gem 'sqlite3'
   gem 'nokogiri'
   gem 'sinatra_warden', git: 'https://github.com/quarter-spiral/sinatra_warden.git'

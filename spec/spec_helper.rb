@@ -8,6 +8,7 @@ require 'graph-backend'
 require 'auth-backend'
 require 'playercenter-backend'
 require 'rack/client'
+require 'uuid'
 
 require 'playercenter-client'
 

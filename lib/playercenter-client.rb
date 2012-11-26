@@ -12,7 +12,11 @@ module Playercenter
       @client = Service::Client.new(url)
 
       # Info
-      @client.urls.add(:info, :get,    "/#{API_VERSION}/:uuid:")
+      @client.urls.add(:info, :get,     "/#{API_VERSION}/:uuid:")
+
+      # Games
+      @client.urls.add(:games, :get,    "/#{API_VERSION}/:uuid:/games")
+      @client.urls.add(:games, :post,   "/#{API_VERSION}/:player_uuid:/games/:game_uuid:/:venue:")
 
       # Friends
       @client.urls.add(:friends, :get,  "/#{API_VERSION}/:uuid:/friends")
@@ -32,6 +36,14 @@ module Playercenter
 
     def update_friends_of(uuid, token, venue, friends_venue_data)
       @client.put(@client.urls.friends(uuid: uuid, venue: venue), token, "friends" => friends_venue_data).data
+    end
+
+    def list_games(uuid, token)
+      @client.get(@client.urls.games(uuid: uuid), token).data
+    end
+
+    def register_player(player_uuid, game_uuid, venue, token)
+      @client.post(@client.urls.games(player_uuid: player_uuid, game_uuid: game_uuid, venue: venue), token).data
     end
   end
 end

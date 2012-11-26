@@ -31,6 +31,18 @@ info # => {
      #    }
 ```
 
+### Register a user at a game on a venue
+
+```ruby
+client.register_player(player_uuid, game_uuid, venue, token)
+```
+
+### Get all games of a player
+
+```ruby
+client.list_games(player_uuid, token) # => ['uuid1', 'uuid2', 'uuid3']
+```
+
 ### Friends
 
 #### List friends of a user

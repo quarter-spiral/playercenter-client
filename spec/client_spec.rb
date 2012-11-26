@@ -66,6 +66,36 @@ describe Playercenter::Client do
     }.must_raise Service::Client::ServiceError
   end
 
+  it "can register a player at a game" do
+    venue_options = {"venue-id" => "2354243", "name" => "Peter Smith"}
+    venue_token = auth_client.venue_token(app_token, 'facebook', venue_options)
+    player_uuid = auth_client.token_owner(venue_token)['uuid']
+
+    game_uuid = UUID.new.generate
+    game2_uuid = UUID.new.generate
+    graph_client = Graph::Client.new('http://graph-backend.dev')
+    graph_client.add_role(game_uuid, token, 'game')
+    graph_client.add_role(game2_uuid, token, 'game')
+
+    @client.list_games(player_uuid, token).empty?.must_equal true
+
+    @client.register_player(player_uuid, game_uuid, 'facebook', token)
+    games = @client.list_games(player_uuid, token)
+    games.size.must_equal 1
+    games.must_include game_uuid
+
+    @client.register_player(player_uuid, game_uuid, 'facebook', token)
+    games = @client.list_games(player_uuid, token)
+    games.size.must_equal 1
+    games.must_include game_uuid
+
+    @client.register_player(player_uuid, game2_uuid, 'galaxy-spiral', token)
+    games = @client.list_games(player_uuid, token)
+    games.size.must_equal 2
+    games.must_include game_uuid
+    games.must_include game2_uuid
+  end
+
   it "can updates friends of a user" do
     venue_options = {"venue-id" => "2354243", "name" => "Peter Smith"}
     venue_token = auth_client.venue_token(app_token, 'facebook', venue_options)
