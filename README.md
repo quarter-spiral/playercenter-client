@@ -40,7 +40,7 @@ client.register_player(player_uuid, game_uuid, venue, token)
 ### Get all games of a player
 
 ```ruby
-client.list_games(player_uuid, token) # => ['uuid1', 'uuid2', 'uuid3']
+client.list_games(player_uuid, token) # => [{"uuid"=>"402665f0-76cb-0130-6898-58b035f5cdfb", "name"=>"A Game", "description"=>"A good game", "screenshots"=>[], "venues"=>["facebook"], "category"=>"Jump n Run", "credits"=>"Quarter Spiral", "credits_url"=>"http://quarterspiral.com"}, …]
 ```
 
 ### Friends

@@ -7,10 +7,13 @@ require 'minitest/autorun'
 require 'graph-backend'
 require 'auth-backend'
 require 'playercenter-backend'
+require 'devcenter-backend'
+require 'datastore-backend'
 require 'rack/client'
 require 'uuid'
 
 require 'playercenter-client'
+require 'devcenter-client'
 
 def wipe_graph!
   connection = Graph::Backend::Connection.create.neo4j

@@ -1,3 +1,7 @@
+# 0.0.4 WIP
+
+* Updates dependencies
+
 # 0.0.3
 
 * Adds player's game registration and game listing endpoint from playercenter-backend

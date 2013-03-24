@@ -39,7 +39,7 @@ module Playercenter
     end
 
     def list_games(uuid, token)
-      @client.get(@client.urls.games(uuid: uuid), token).data
+      @client.get(@client.urls.games(uuid: uuid), token).data['games']
     end
 
     def register_player(player_uuid, game_uuid, venue, token)

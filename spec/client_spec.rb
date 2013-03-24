@@ -3,6 +3,8 @@ require_relative './spec_helper'
 API_APP = Playercenter::Backend::API.new
 GRAPH_APP = Graph::Backend::API.new
 AUTH_APP = Auth::Backend::App.new(test: true)
+DEVCENTER_APP = Devcenter::Backend::API.new
+DATASTORE_APP = Datastore::Backend::API.new
 
 module Auth
   class Client
@@ -19,6 +21,57 @@ module Graph
     def initialize(*args)
       raw_initialize(*args)
       client.raw.adapter = Service::Client::Adapter::Faraday.new(adapter: [:rack, GRAPH_APP])
+    end
+  end
+end
+
+module Devcenter
+  class Client
+    alias raw_initialize initialize
+    def initialize(*args)
+      raw_initialize(*args)
+      client.raw.adapter = Service::Client::Adapter::Faraday.new(adapter: [:rack, DEVCENTER_APP])
+    end
+  end
+end
+
+module Datastore
+  class Client
+    alias raw_initialize initialize
+    def initialize(*args)
+      raw_initialize(*args)
+      client.raw.adapter = Service::Client::Adapter::Faraday.new(adapter: [:rack, DATASTORE_APP])
+    end
+  end
+end
+
+module Auth::Backend
+  class Connection
+    alias raw_initialize initialize
+    def initialize(*args)
+      result = raw_initialize(*args)
+
+      graph_adapter = Service::Client::Adapter::Faraday.new(adapter: [:rack, GRAPH_APP])
+      @graph.client.raw.adapter = graph_adapter
+
+      result
+    end
+  end
+end
+
+module Devcenter::Backend
+  class Connection
+    alias raw_initialize initialize
+    def initialize(*args)
+      result = raw_initialize(*args)
+
+      datatstore_adapter = Service::Client::Adapter::Faraday.new(adapter: [:rack, DATASTORE_APP])
+      @datastore.client.raw.adapter = datatstore_adapter
+
+      graph_adapter = Service::Client::Adapter::Faraday.new(adapter: [:rack, GRAPH_APP])
+      @graph.client.raw.adapter = graph_adapter
+
+      result
     end
   end
 end
@@ -71,29 +124,31 @@ describe Playercenter::Client do
     venue_token = auth_client.venue_token(app_token, 'facebook', venue_options)
     player_uuid = auth_client.token_owner(venue_token)['uuid']
 
-    game_uuid = UUID.new.generate
-    game2_uuid = UUID.new.generate
     graph_client = Graph::Client.new('http://graph-backend.dev')
-    graph_client.add_role(game_uuid, token, 'game')
-    graph_client.add_role(game2_uuid, token, 'game')
+    graph_client.add_role(player_uuid, app_token, 'developer')
+    game_options = {:name => "Test Game 1", :description => "Good game 1", :configuration => {'type' => 'html5', 'url' => 'http://example.com/1'},:developers => [player_uuid], :venues => {"facebook" => {"enabled" => true, "app-id" => "123", "app-secret" => "456"}}, :category => 'Jump n Run'}
+    game_uuid = Devcenter::Backend::Game.create(app_token, game_options).uuid
+
+    game_options = {:name => "Test Game 2", :description => "Good game 2", :configuration => {'type' => 'html5', 'url' => 'http://example.com/2'},:developers => [player_uuid], :venues => {"facebook" => {"enabled" => true, "app-id" => "123", "app-secret" => "456"}}, :category => 'Jump n Run'}
+    game2_uuid = Devcenter::Backend::Game.create(app_token, game_options).uuid
 
     @client.list_games(player_uuid, token).empty?.must_equal true
 
     @client.register_player(player_uuid, game_uuid, 'facebook', token)
     games = @client.list_games(player_uuid, token)
     games.size.must_equal 1
-    games.must_include game_uuid
+    games.select {|g| g['uuid'] == game_uuid}.empty?.must_equal false
 
     @client.register_player(player_uuid, game_uuid, 'facebook', token)
     games = @client.list_games(player_uuid, token)
     games.size.must_equal 1
-    games.must_include game_uuid
+    games.select {|g| g['uuid'] == game_uuid}.empty?.must_equal false
 
     @client.register_player(player_uuid, game2_uuid, 'galaxy-spiral', token)
     games = @client.list_games(player_uuid, token)
     games.size.must_equal 2
-    games.must_include game_uuid
-    games.must_include game2_uuid
+    games.select {|g| g['uuid'] == game_uuid}.empty?.must_equal false
+    games.select {|g| g['uuid'] == game2_uuid}.empty?.must_equal false
   end
 
   it "can updates friends of a user" do
@@ -107,8 +162,9 @@ describe Playercenter::Client do
     @client.update_friends_of(uuid, venue_token, 'facebook', [friend_1, friend_2])
 
     friends = @client.friends_of(uuid, venue_token)
-    friends.keys.size.must_equal 2
+    friends.keys.size.must_equal 3
 
+    friends.values.select {|v| v['facebook'] == {"id" => venue_options['venue-id'], "name" => venue_options['name']}}.empty?.must_equal false
     friends.values.must_include("facebook" => {"id" => friend_1['venue-id'], "name" => friend_1['name']})
     friends.values.must_include("facebook" => {"id" => friend_2['venue-id'], "name" => friend_2['name']})
   end
